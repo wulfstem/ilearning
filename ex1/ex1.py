@@ -43,10 +43,10 @@ cursor.execute("""
     CREATE TABLE summary AS
     SELECT year as publication_year,
     COUNT(*) as book_count,
-    ROUND(SUM(CASE
+    "$" || CAST(ROUND(SUM(CASE
         WHEN price LIKE "€%" THEN CAST(SUBSTR(price, 2) * 1.2 AS REAL)
         ELSE CAST(SUBSTR(price, 2) AS REAL)
-    END) / COUNT(*), 2) as average_price
+    END) / COUNT(*), 2) AS TEXT) as average_price
     FROM books
     GROUP BY year
 """)
