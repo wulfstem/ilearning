@@ -66,8 +66,19 @@ async function drawDashboard() {
 
         const labels = rawData.map(r => r[0]);
 
-        const analysisPromises = selectedColumns.map(c => fetchAnalysis(c, trendDegree));
-        const allAnalysis = await Promise.all(analysisPromises);
+        console.log('Selected columns:', selectedColumns);
+        console.log('Trend degree:', trendDegree);
+
+        const allAnalysis = [];
+        for (const column of selectedColumns) {
+            try {
+                const analysis = await fetchAnalysis(column, trendDegree);
+                allAnalysis.push(analysis);
+            } catch (err) {
+                console.error(`Failed to fetch analysis for column ${column}:`, err);
+                throw new Error(`Failed to analyze ${headers[column]}: ${err.message}`);
+            }
+        }
 
         const datasets = buildDatasets(allAnalysis, selectedColumns, headers, chartType);
 
@@ -78,7 +89,7 @@ async function drawDashboard() {
         chart = createChart(chartType, labels, datasets);
     }
     catch (err) {
-        console.error(err);
+        console.error('Dashboard error:', err);
         alert("Error building dashboard: " + err.message);
     }
     finally {
