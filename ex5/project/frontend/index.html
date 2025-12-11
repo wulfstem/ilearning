@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weyland-Yutani Mines Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <div class="logo">WY</div>
+        <h1>Weyland-Yutani Mining Operations</h1>
+        <div class="subtitle">Real-time Analytics Dashboard</div>
+    </div>
+    <button class="export-btn" onclick="generateReport()">
+        📊 Export PDF Report
+    </button>
+</div>
+
+<div class="dashboard-container">
+    <div class="controls-panel">
+        <div class="controls-grid">
+            <div class="control-group">
+                <label class="control-label">Chart Type</label>
+                <select id="chartType">
+                    <option value="line">Line Chart</option>
+                    <option value="bar">Bar Chart</option>
+                    <option value="stackedBar">Stacked Bar Chart</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Trend Analysis</label>
+                <select id="trendDegree">
+                    <option value="1">Linear (Degree 1)</option>
+                    <option value="2">Quadratic (Degree 2)</option>
+                    <option value="3">Cubic (Degree 3)</option>
+                    <option value="4">Quartic (Degree 4)</option>
+                </select>
+            </div>
+            
+            <div class="filter-section">
+                <div class="control-label">Mine Selection Filter</div>
+                <div id="mineFilterContainer" class="filter-chips"></div>
+                <div class="filter-actions">
+                    <button onclick="selectAllMines()">✓ Select All</button>
+                    <button onclick="deselectAllMines()">✗ Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-panel">
+        <h2 class="panel-title">📈 Production Trends</h2>
+        <canvas id="chart" height="200"></canvas>
+    </div>
+
+    <div class="tables-grid">
+        <div class="table-panel">
+            <h2 class="panel-title">📊 Statistical Analysis</h2>
+            <div class="table-container" id="statsTable"></div>
+        </div>
+        
+        <div class="table-panel">
+            <h2 class="panel-title">⚠️ Anomaly Detection</h2>
+            <div class="table-container" id="anomalyTable"></div>
+        </div>
+    </div>
+</div>
+
+<div id="loading-overlay">
+    <div class="loader"></div>
+    <p>Loading Dashboard Data...</p>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
