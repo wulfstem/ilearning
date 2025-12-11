@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://task5-abfk.onrender.com";
 
 export async function fetchData() {
     const res = await fetch(`${API_BASE}/data`);
