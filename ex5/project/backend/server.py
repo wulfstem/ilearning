@@ -5,12 +5,11 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import numpy as np
 from scipy import stats
+import json
 import uvicorn
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVICE_ACCOUNT_PATH = os.path.join(BASE_DIR, "service_account.json")
-
 
 SHEET_ID = "1xY11kAjYRfSq_JA3L3ew8yUEvbSAtch9O0t-ZyNvMY4"
 RANGE = "FinalData!A1:F9999"
@@ -26,8 +25,9 @@ app.add_middleware(
 )
 
 def load_sheet():
-    creds = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_PATH,
+    key_dict = json.loads(os.environ['GOOGLE_CREDENTIALS_JSON'])
+    creds = Credentials.from_service_account_info(
+        key_dict,
         scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"]
     )
     service = build("sheets", "v4", credentials=creds)
