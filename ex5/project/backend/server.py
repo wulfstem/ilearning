@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from google.oauth2.service_account import Credentials
@@ -94,28 +94,60 @@ def get_data():
     return {"headers": headers, "rows": data_rows}
 
 @app.get("/analyze")
-def analyze(column: int, trend_degree: int = 1):
-    rows = load_sheet()
-    data = [float(r[column]) for r in rows[1:] if r[column] != ""]
-    arr = np.array(data)
+def analyze(column: int = None, trend_degree: int = 1):
+    # Validate column parameter
+    if column is None:
+        raise HTTPException(status_code=400, detail="column parameter is required")
+    
+    try:
+        rows = load_sheet()
+        
+        # Validate column index
+        if column < 0 or column >= len(rows[0]):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid column index: {column}. Must be between 0 and {len(rows[0])-1}"
+            )
+        
+        # Extract data with better error handling
+        data = []
+        for r in rows[1:]:
+            if len(r) > column and r[column] != "":
+                try:
+                    data.append(float(r[column]))
+                except (ValueError, TypeError):
+                    continue  # Skip non-numeric values
+        
+        if len(data) == 0:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"No valid numeric data found in column {column}"
+            )
+        
+        arr = np.array(data)
 
-    stats_data = compute_stats(arr)
+        stats_data = compute_stats(arr)
 
-    anomalies = {
-        "iqr": detect_iqr(arr),
-        "zscore": detect_zscore(arr),
-        "moving_avg": detect_moving_average(arr),
-        "grubbs": detect_grubbs(arr)
-    }
+        anomalies = {
+            "iqr": detect_iqr(arr),
+            "zscore": detect_zscore(arr),
+            "moving_avg": detect_moving_average(arr),
+            "grubbs": detect_grubbs(arr)
+        }
 
-    trend = poly_trendline(arr, trend_degree)
+        trend = poly_trendline(arr, trend_degree)
 
-    return {
-        "stats": stats_data,
-        "anomalies": anomalies,
-        "trend": trend,
-        "values": data
-    }
+        return {
+            "stats": stats_data,
+            "anomalies": anomalies,
+            "trend": trend,
+            "values": data
+        }
+    
+    except HTTPException:
+        raise  # Re-raise HTTPExceptions as-is
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "../frontend"), html=True), name="frontend")
 
