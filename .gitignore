@@ -37,3 +37,4 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+ex5/project/backend/service_account.json
